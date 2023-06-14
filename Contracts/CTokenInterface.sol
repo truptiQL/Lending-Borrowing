@@ -85,6 +85,8 @@ contract CTokenStorage {
      */
     uint public totalSupply;
 
+    mapping (address => uint) internal borrowBalance;
+
     // Official record of token balances for each account
     mapping (address => uint) internal accountTokens;
 
@@ -132,7 +134,7 @@ abstract contract CTokenInterface is CTokenStorage {
     /**
      * @notice Event emitted when tokens are redeemed
      */
-    event Redeem(address redeemer, uint redeemAmount, uint redeemTokens);
+    event Redeem(address redeemer, uint redeemTokens);
 
     /**
      * @notice Event emitted when underlying is borrowed

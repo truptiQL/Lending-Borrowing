@@ -2,7 +2,7 @@ import "./LendingAndBorrowing.sol";
 import "./InterestRateModel.sol";
 import "./CTokenInterface.sol";
 
-contract CToken is CTokenInterface {
+abstract contract CToken is CTokenInterface {
     
     function initialize(
         string memory _name,
@@ -83,7 +83,7 @@ contract CToken is CTokenInterface {
     function transfer(
         address dst,
         uint256 amount
-    ) external nonReentrant returns (bool) {
+    ) external override nonReentrant returns (bool) {
         return transferTokens(msg.sender, msg.sender, dst, amount) == true;
     }
 
@@ -98,7 +98,7 @@ contract CToken is CTokenInterface {
         address src,
         address dst,
         uint256 amount
-    ) external nonReentrant returns (bool) {
+    ) external override nonReentrant returns (bool) {
         return transferTokens(msg.sender, src, dst, amount) == true;
     }
 
@@ -113,7 +113,7 @@ contract CToken is CTokenInterface {
     function approve(
         address spender,
         uint256 amount
-    ) external returns (bool) {
+    ) override external returns (bool) {
         address src = msg.sender;
         transferAllowances[src][spender] = amount;
         emit Approval(src, spender, amount);
@@ -129,7 +129,7 @@ contract CToken is CTokenInterface {
     function allowance(
         address owner,
         address spender
-    ) external view  returns (uint256) {
+    ) override external view  returns (uint256) {
         return transferAllowances[owner][spender];
     }
 
@@ -138,32 +138,27 @@ contract CToken is CTokenInterface {
      * @param owner The address of the account to query
      * @return The number of tokens owned by `owner`
      */
-    function balanceOf(address owner) external view  returns (uint256) {
+    function balanceOf(address owner) override external view  returns (uint256) {
         return accountTokens[owner];
     }
 
-    function balanceOfUnderlying(address owner) public returns(uint256){
+    function balanceOfUnderlying(address owner) override public returns(uint256){
         return (LendingAndBorrowing.currentExchangeRate() * accountTokens[owner]);
     }
 
-    function accrueInterest() public {}
 
     /// @param mintAmount number of underlying assets
     function mint(uint256 mintAmount, address underlyingToken) public {
-        accrueInterest();
         address cToken = address(this);
         address minter = msg.sender;
         require(LendingAndBorrowing.markets[cToken].islisted, "market not listed");
-        // for this first we have to check no of underlyings
-        // mintAmount == underlying * exchangeRate
-        // pehele user underlying transfer karega to this contract then he will get ctoken
-
+      
         require(
             underlyingToken.transferFrom(minter, address(this), mintAmount),
             "underlying not received"
         );
 
-        mintTokens = mintAmount / LendingAndBorrowing.currentExchangeRate();
+        uint256 mintTokens = mintAmount / LendingAndBorrowing.currentExchangeRate();
 
         totalSupply += mintTokens;
         accountTokens[minter] += mintTokens;
@@ -196,7 +191,7 @@ contract CToken is CTokenInterface {
             "not transfered"
         );
 
-        emit RedeemTokens(redeemer, _redeemTokens);
+        emit Redeem(redeemer, _redeemTokens);
     }
 
     function borrow(
