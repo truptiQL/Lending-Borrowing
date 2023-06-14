@@ -9,16 +9,8 @@ import "./LendingAndBorrowingInterface.sol";
 
  contract CToken is CTokenInterface {
     function initialize(
-        string memory _name,
-        string memory _symbol,
-        uint8 _decimals,
-        address _LendingAndBorrowing
     ) public {
-        name = _name;
-        symbol = _symbol;
-        decimals = _decimals;
         _notEntered = true;
-        LendingAndBorrowing = _LendingAndBorrowing;
     }
 
     LendingAndBorrowingInterface internal comptroller =
@@ -161,8 +153,6 @@ import "./LendingAndBorrowingInterface.sol";
     function mint(uint256 mintAmount, address underlyingToken) public {
         address cToken = address(this);
         address minter = msg.sender;
-        // bool listed = comptroller.markets[cToken].isListed;
-        // require(listed, "market not listed");
 
         require(
             CToken(underlyingToken).transferFrom(
