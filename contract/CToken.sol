@@ -1,9 +1,13 @@
+// SPDX-License-Identifier: Unlicense
+pragma solidity 0.8.19;
+
+
 import "./LendingAndBorrowingInterface.sol";
 import "./InterestRateModel.sol";
 import "./CTokenInterface.sol";
 import "./LendingAndBorrowingInterface.sol";
 
-abstract contract CToken is CTokenInterface {
+ contract CToken is CTokenInterface {
     function initialize(
         string memory _name,
         string memory _symbol,
@@ -35,10 +39,10 @@ abstract contract CToken is CTokenInterface {
     ) internal returns (bool) {
         /* Fail if transfer not allowed */
 
-        // require(
-        //     !LendingAndBorrowing.isUnderwater(src, tokens),
-        //     "Account is underwater"
-        // );
+        require(
+            !comptroller.isUnderwater(src, tokens),
+            "Account is underwater"
+        );
 
         /* Do not allow self-transfers */
         if (src == dst) {
@@ -149,8 +153,8 @@ abstract contract CToken is CTokenInterface {
 
     function balanceOfUnderlying(
         address owner
-    ) public override returns (uint256) {
-        return (comptroller.currentExchangeRate() * accountTokens[owner]);
+    ) public override view returns (uint256) {
+        return (currentExchangeRate() * accountTokens[owner]);
     }
 
     /// @param mintAmount number of underlying assets
@@ -163,19 +167,19 @@ abstract contract CToken is CTokenInterface {
         require(
             CToken(underlyingToken).transferFrom(
                 minter,
-                address(this),
+                cToken,
                 mintAmount
             ),
             "underlying not received"
         );
 
-        uint256 mintTokens = mintAmount / comptroller.currentExchangeRate();
+        uint256 mintTokens = mintAmount / currentExchangeRate();
 
         totalSupply += mintTokens;
         accountTokens[minter] += mintTokens;
 
         emit Mint(minter, mintAmount, mintTokens);
-        emit Transfer(address(this), minter, mintTokens);
+        emit Transfer(cToken, minter, mintTokens);
     }
 
     function redeemTokens(
@@ -183,8 +187,10 @@ abstract contract CToken is CTokenInterface {
         uint256 _redeemTokens,
         address underlying
     ) public {
-
-        require(comptroller.redeemAllowed(address(this), redeemer), "redeem not allowed");
+        require(
+            comptroller.redeemAllowed(address(this), redeemer),
+            "redeem not allowed"
+        );
 
         if (accountTokens[address(this)] < _redeemTokens) {
             revert();
@@ -194,7 +200,7 @@ abstract contract CToken is CTokenInterface {
         accountTokens[redeemer] += accountTokens[redeemer] - _redeemTokens;
 
         uint256 redeemAmount = _redeemTokens *
-            comptroller.currentExchangeRate();
+            currentExchangeRate();
 
         require(
             CToken(underlying).transferFrom(
@@ -222,10 +228,7 @@ abstract contract CToken is CTokenInterface {
             !comptroller.isUnderwater(address(this), borrowBalance[msg.sender]),
             "Underwater account"
         );
-        require(
-            comptroller.borrowAllowed(address(this)),
-            "market not listed"
-        );
+        require(comptroller.borrowAllowed(address(this)), "market not listed");
         borrowBalance[borrower] += borrowAmount;
         totalBorrows += borrowAmount;
 
@@ -247,4 +250,32 @@ abstract contract CToken is CTokenInterface {
         totalBorrows -= repayAmount;
     }
 
+     function currentExchangeRate() override internal view returns (uint) {
+        uint _totalSupply = totalSupply;
+        if (_totalSupply == 0) {
+            /*
+             * If there are no tokens minted:
+             *  exchangeRate = initialExchangeRate
+             */
+            return 1;
+        } else {
+            /*
+             * Otherwise:
+             *  exchangeRate = (totalCash + totalBorrows - totalReserves) / totalSupply
+             */
+            uint totalCash = 200;
+            uint cashPlusBorrowsMinusReserves = totalCash + totalBorrows - totalReserves;
+            uint exchangeRate = cashPlusBorrowsMinusReserves / _totalSupply;
+
+            return exchangeRate;
+        }
+    }
+
+    function getBorrowRate() internal override returns(uint256) {
+         return interestRateModel.borrowRate(200, totalBorrows, totalReserves);
+    }
+
+    function getSupplyRate() internal override returns(uint256) {
+         return interestRateModel.supplyRate(200, totalBorrows, totalReserves, 1);
+    }
 }

@@ -2,6 +2,7 @@
 pragma solidity ^0.8.10;
 
 import "./CToken.sol";
+
 abstract contract LendingAndBorrowingInterface {
     /// @notice Indicator that this is a Comptroller contract (for inspection)
     bool public constant isComptroller = true;
@@ -22,20 +23,26 @@ abstract contract LendingAndBorrowingInterface {
 
     event MatketExit(address);
 
-    event AddedToTheMarket();
+    event AddedToTheMarket(CToken, address);
+    
+
 
     function enterMarket(address cTokens) external virtual;
 
     function exitMarket(address cToken) external virtual;
 
-    function currentExchangeRate() external virtual returns (uint8);
+    function redeemAllowed(
+        address cToken,
+        address redeemer
+    ) external virtual returns (bool);
 
-function redeemAllowed(address cToken, address redeemer) external virtual returns(bool);
-
-   function isUnderwater(
+    function isUnderwater(
         address cToken,
         uint256 totalBorrows
     ) external virtual returns (bool);
 
-    function borrowAllowed(address cToken) external virtual returns(bool);
+    function borrowAllowed(address cToken) external virtual returns (bool);
+
+    function addToTheMarket(CToken ctoken, address account) external virtual;
+
 }

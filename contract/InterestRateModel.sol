@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Unlicense
+pragma solidity 0.8.19;
 
 
 contract InterestRateModel{
@@ -14,8 +16,8 @@ contract InterestRateModel{
     function supplyRate(uint256 cash, uint256 borrows, uint256 reserves, uint256 reserveFactor) public view returns (uint256) {
         uint256 BASE = 1e18;
         uint256 oneMinusReserveFactor = BASE - reserveFactor;
-        uint256 borrowRate = borrowRate(cash, borrows, reserves);
-        uint256 rateToPool = borrowRate * oneMinusReserveFactor / BASE;
+        uint256 _borrowRate = borrowRate(cash, borrows, reserves);
+        uint256 rateToPool = _borrowRate * oneMinusReserveFactor / BASE;
         return utilizationRate(cash, borrows, reserves) * rateToPool / BASE;
     }
     

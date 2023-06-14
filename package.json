@@ -5,6 +5,8 @@
     "hardhat": "^2.15.0"
   },
   "dependencies": {
-    "hardhat-deploy": "^0.11.30"
+    "chai": "^4.3.7",
+    "hardhat-deploy": "^0.11.30",
+    "mocha": "^10.2.0"
   }
 }

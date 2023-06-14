@@ -6,10 +6,11 @@ import "./LendingAndBorrowing.sol";
 
 contract Token1 is CToken {
 
-    constructor(string memory _name, string memory _symbol, uint8 _decimal){
+    constructor(string memory _name, string memory _symbol, uint8 _decimals, address _LendingAndBorrowing){
         name = _name;
         symbol = _symbol;
-        _decimal = _decimal;
+        decimals = _decimals;
+        LendingAndBorrowing = _LendingAndBorrowing;
     }
 
 }
