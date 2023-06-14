@@ -5,12 +5,11 @@ import "./CToken.sol";
 import "./LendingAndBorrowing.sol";
 
 contract Token1 is CToken {
-    function price() public returns (uint8) {
-        return 1;
+
+    constructor(string memory _name, string memory _symbol, uint8 _decimal){
+        name = _name;
+        symbol = _symbol;
+        _decimal = _decimal;
     }
-
-    
-
-
 
 }

@@ -1,19 +1,24 @@
-import "./LendingAndBorrowing.sol";
+import "./LendingAndBorrowingInterface.sol";
 import "./InterestRateModel.sol";
 import "./CTokenInterface.sol";
+import "./LendingAndBorrowingInterface.sol";
 
 abstract contract CToken is CTokenInterface {
-    
     function initialize(
         string memory _name,
         string memory _symbol,
-        uint8 _decimals
+        uint8 _decimals,
+        address _LendingAndBorrowing
     ) public {
         name = _name;
         symbol = _symbol;
         decimals = _decimals;
         _notEntered = true;
+        LendingAndBorrowing = _LendingAndBorrowing;
     }
+
+    LendingAndBorrowingInterface internal comptroller =
+        LendingAndBorrowingInterface(LendingAndBorrowing);
 
     modifier nonReentrant() {
         require(_notEntered, "re-entered");
@@ -113,7 +118,7 @@ abstract contract CToken is CTokenInterface {
     function approve(
         address spender,
         uint256 amount
-    ) override external returns (bool) {
+    ) external override returns (bool) {
         address src = msg.sender;
         transferAllowances[src][spender] = amount;
         emit Approval(src, spender, amount);
@@ -129,7 +134,7 @@ abstract contract CToken is CTokenInterface {
     function allowance(
         address owner,
         address spender
-    ) override external view  returns (uint256) {
+    ) external view override returns (uint256) {
         return transferAllowances[owner][spender];
     }
 
@@ -138,27 +143,33 @@ abstract contract CToken is CTokenInterface {
      * @param owner The address of the account to query
      * @return The number of tokens owned by `owner`
      */
-    function balanceOf(address owner) override external view  returns (uint256) {
+    function balanceOf(address owner) external view override returns (uint256) {
         return accountTokens[owner];
     }
 
-    function balanceOfUnderlying(address owner) override public returns(uint256){
-        return (LendingAndBorrowing.currentExchangeRate() * accountTokens[owner]);
+    function balanceOfUnderlying(
+        address owner
+    ) public override returns (uint256) {
+        return (comptroller.currentExchangeRate() * accountTokens[owner]);
     }
-
 
     /// @param mintAmount number of underlying assets
     function mint(uint256 mintAmount, address underlyingToken) public {
         address cToken = address(this);
         address minter = msg.sender;
-        require(LendingAndBorrowing.markets[cToken].islisted, "market not listed");
-      
+        // bool listed = comptroller.markets[cToken].isListed;
+        // require(listed, "market not listed");
+
         require(
-            underlyingToken.transferFrom(minter, address(this), mintAmount),
+            CToken(underlyingToken).transferFrom(
+                minter,
+                address(this),
+                mintAmount
+            ),
             "underlying not received"
         );
 
-        uint256 mintTokens = mintAmount / LendingAndBorrowing.currentExchangeRate();
+        uint256 mintTokens = mintAmount / comptroller.currentExchangeRate();
 
         totalSupply += mintTokens;
         accountTokens[minter] += mintTokens;
@@ -172,22 +183,25 @@ abstract contract CToken is CTokenInterface {
         uint256 _redeemTokens,
         address underlying
     ) public {
-        require(LendingAndBorrowing.markets[address(this)].isListed, "Market not listed");
 
-        /* If the redeemer is not 'in' the market, then we can bypass the liquidity check */
-        require(LendingAndBorrowing.markets[CToken].accountMembership[redeemer], "Not in a market");
+        require(comptroller.redeemAllowed(address(this), redeemer), "redeem not allowed");
 
         if (accountTokens[address(this)] < _redeemTokens) {
-            revert;
+            revert();
         }
 
         totalSupply -= _redeemTokens;
         accountTokens[redeemer] += accountTokens[redeemer] - _redeemTokens;
 
-        uint256 redeemAmount = _redeemTokens * LendingAndBorrowing.currentExchangeRate();
+        uint256 redeemAmount = _redeemTokens *
+            comptroller.currentExchangeRate();
 
         require(
-            underlying.transferFrom(address(this), redeemer, redeemAmount),
+            CToken(underlying).transferFrom(
+                address(this),
+                redeemer,
+                redeemAmount
+            ),
             "not transfered"
         );
 
@@ -201,19 +215,21 @@ abstract contract CToken is CTokenInterface {
     ) public {
         // CHECK for underwater??
         require(
-            underlying.balanceOf(address(this)) > borrowAmount,
+            CToken(underlying).balanceOf(address(this)) > borrowAmount,
             "This much amount is not available"
         );
         require(
-            !LendingAndBorrowing.isUnderwater(address(this), borrowBalance[msg.sender]),
+            !comptroller.isUnderwater(address(this), borrowBalance[msg.sender]),
             "Underwater account"
         );
-        require(address(this).price() != 0, "Price Error");
-        require(LendingAndBorrowing.makets[address(this)].isListed, "market not listed");
+        require(
+            comptroller.borrowAllowed(address(this)),
+            "market not listed"
+        );
         borrowBalance[borrower] += borrowAmount;
         totalBorrows += borrowAmount;
 
-        underlying.transferFrom(address(this), borrower, borrowAmount);
+        CToken(underlying).transferFrom(address(this), borrower, borrowAmount);
     }
 
     function repayBorrow(
@@ -225,11 +241,10 @@ abstract contract CToken is CTokenInterface {
             borrowBalance[borrower] >= repayAmount,
             "Invalid borrow amount"
         );
-        underlying.transferFrom(borrower, address(this), repayAmount);
+        CToken(underlying).transferFrom(borrower, address(this), repayAmount);
 
         borrowBalance[borrower] -= repayAmount;
         totalBorrows -= repayAmount;
     }
 
-    function price(address cToken) public virtual {}
 }

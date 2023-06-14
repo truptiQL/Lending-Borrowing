@@ -1,50 +1,45 @@
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity 0.8.19;
+
 import "./CToken.sol";
+import "./LendingAndBorrowingInterface.sol";
 
-contract LendingAndBorrowing {
-    struct Market {
-        bool isListed;
-        uint256 collateralFactor;
-        // mapping(address => bool) accountMembership;
-    }
-
-    mapping(address => Market) public markets;
-
-    address public admin;
-    uint256 collateralFactor = 8 * 1e17;//0.8
-
-    event MarketAdded(address);
-
-    event MatketExit(address);
-
-    event AddedToTheMarket();
-
+contract LendingAndBorrowing is LendingAndBorrowingInterface {
     constructor() {
         admin = msg.sender;
     }
 
-    function addMarket(address cToken) public {
+    function enterMarket(address cToken) public override {
         markets[cToken].isListed = true;
         // markets[market].collateralFactor = 0.8;
 
         emit MarketAdded(cToken);
     }
 
-    function exitMarket(address cToken) public {
+    function exitMarket(address cToken) public override {
         markets[cToken].isListed = false;
 
         emit MatketExit(cToken);
     }
 
-    function currentExchangeRate() public returns(uint8) {
+    function currentExchangeRate() public override returns (uint8) {
         return 1;
     }
 
     function isUnderwater(
-        CToken cToken,
+        address cToken,
         uint256 totalBorrows
-    ) public returns(bool) {
+    ) external override returns (bool) {
         // totalcollateral - totalborrows
 
-        return((cToken.totalSupply() * collateralFactor) < totalBorrows);
+        return ((CToken(cToken).totalSupply() * collateralFactor) < totalBorrows);
+    }
+
+    function redeemAllowed(address cToken, address redeemer) external override returns(bool){
+        return (markets[cToken].isListed && markets[cToken].accountMembership[redeemer]);
+    }
+
+    function borrowAllowed(address cToken) external override returns(bool) {
+        return (markets[cToken].isListed);
     }
 }
