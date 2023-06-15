@@ -36,6 +36,7 @@ contract LendingAndBorrowing is LendingAndBorrowingInterface {
         address cToken,
         address redeemer
     ) external view override returns (bool) {
+        
         return (markets[cToken].isListed &&
             markets[cToken].accountMembership[redeemer]);
     }
@@ -46,8 +47,8 @@ contract LendingAndBorrowing is LendingAndBorrowingInterface {
         return (markets[cToken].isListed);
     }
 
-    function addToTheMarket(CToken cToken, address account) external override {
-        Market storage marketToJoin = markets[address(cToken)];
+    function addToTheMarket(address cToken, address account) external override {
+        Market storage marketToJoin = markets[cToken];
 
         require(marketToJoin.isListed, "Market not listed");
         if (marketToJoin.accountMembership[account] == false) {

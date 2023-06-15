@@ -13,3 +13,9 @@ main().catch((error) => {
   console.error(error);
   process.exitCode = 1;
 });
+
+// TO verify the contract
+await hre.run("verify:verify", {
+    address: Token.address,  
+    constructorArguments: ["Token2", "T2", 18, "address"],
+  });

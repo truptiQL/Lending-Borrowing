@@ -12,11 +12,11 @@ describe("LendingAndBorrowing", async function () {
     await lendingAndBorrowing.deployed();
 
     const Token1 = await ethers.getContractFactory("Token1");
-    token1 = await Token1.deploy("Token1", "T1", 18);
+    token1 = await Token1.deploy("Token1", "T1", 18, lendingAndBorrowing.address);
     await token1.deployed();
 
     const Token2 = await ethers.getContractFactory("Token2");
-    token2 = await Token2.deploy("Token1", "T1", 18);
+    token2 = await Token2.deploy("Token1", "T1", 18, lendingAndBorrowing.address);
     await token2.deployed();
 
     const InterestRateModel = await ethers.getContractFactory(
@@ -38,10 +38,6 @@ describe("LendingAndBorrowing", async function () {
   it("exitMarket", async function () {
     const [, addr1, addr2] = await ethers.getSigners();
 
-    // expect(await lendingAndBorrowing.exitMarket(addr1.address)).to.emit(
-    //   lendingAndBorrowing,
-    //   "MarketExit"
-    // );
     await expect(
       lendingAndBorrowing.exitMarket(addr2.address)
     ).to.be.revertedWith("Market is not there");

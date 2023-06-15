@@ -150,7 +150,7 @@ import "./LendingAndBorrowingInterface.sol";
     }
 
     /// @param mintAmount number of underlying assets
-    function mint(uint256 mintAmount, address underlyingToken) public {
+    function mintToken(uint256 mintAmount, address underlyingToken) internal override {
         address cToken = address(this);
         address minter = msg.sender;
 
@@ -176,7 +176,7 @@ import "./LendingAndBorrowingInterface.sol";
         address redeemer,
         uint256 _redeemTokens,
         address underlying
-    ) public {
+    ) internal override {
         require(
             comptroller.redeemAllowed(address(this), redeemer),
             "redeem not allowed"
@@ -186,7 +186,7 @@ import "./LendingAndBorrowingInterface.sol";
             revert();
         }
 
-        totalSupply -= _redeemTokens;
+        totalSupply -= _redeemTokens ;
         accountTokens[redeemer] += accountTokens[redeemer] - _redeemTokens;
 
         uint256 redeemAmount = _redeemTokens *
@@ -208,7 +208,7 @@ import "./LendingAndBorrowingInterface.sol";
         address borrower,
         uint256 borrowAmount,
         address underlying
-    ) public {
+    ) internal override {
         // CHECK for underwater??
         require(
             CToken(underlying).balanceOf(address(this)) > borrowAmount,
@@ -229,7 +229,7 @@ import "./LendingAndBorrowingInterface.sol";
         address borrower,
         uint256 repayAmount,
         address underlying
-    ) public {
+    ) internal override {
         require(
             borrowBalance[borrower] >= repayAmount,
             "Invalid borrow amount"
@@ -261,11 +261,12 @@ import "./LendingAndBorrowingInterface.sol";
         }
     }
 
-    function getBorrowRate() internal override returns(uint256) {
+    function getBorrowRate() internal override view returns(uint256) {
          return interestRateModel.borrowRate(200, totalBorrows, totalReserves);
     }
 
-    function getSupplyRate() internal override returns(uint256) {
+    function getSupplyRate() internal override view returns(uint256) {
          return interestRateModel.supplyRate(200, totalBorrows, totalReserves, 1);
     }
+
 }

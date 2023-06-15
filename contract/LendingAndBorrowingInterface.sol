@@ -23,7 +23,7 @@ abstract contract LendingAndBorrowingInterface {
 
     event MatketExit(address);
 
-    event AddedToTheMarket(CToken, address);
+    event AddedToTheMarket(address, address);
     
 
 
@@ -43,6 +43,6 @@ abstract contract LendingAndBorrowingInterface {
 
     function borrowAllowed(address cToken) external virtual returns (bool);
 
-    function addToTheMarket(CToken ctoken, address account) external virtual;
+    function addToTheMarket(address ctoken, address account) external virtual;
 
 }

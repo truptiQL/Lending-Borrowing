@@ -259,8 +259,17 @@ abstract contract CTokenInterface is CTokenStorage {
 
     function balanceOfUnderlying(address owner) external virtual returns (uint);
 
-    function getBorrowRate() internal virtual returns(uint256);
-    function getSupplyRate() internal virtual returns(uint256);
-    function currentExchangeRate() internal virtual returns (uint);
-}
+    function getBorrowRate() internal virtual returns (uint256);
 
+    function getSupplyRate() internal virtual returns (uint256);
+
+    function currentExchangeRate() internal virtual returns (uint);
+
+    function mintToken(uint256, address) internal virtual;
+
+    function redeemTokens(address, uint256, address) internal virtual;
+
+    function borrow(address, uint256, address) internal virtual;
+
+    function repayBorrow(address, uint256, address) internal virtual;
+}
