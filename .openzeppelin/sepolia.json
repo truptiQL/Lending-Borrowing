@@ -1,0 +1,1099 @@
+{
+  "manifestVersion": "3.2",
+  "admin": {
+    "address": "0x0d466D71ac1BB477b51049593e0EeE88F5778641",
+    "txHash": "0x86426c762eef1e59574f6b8d27a9b6b4cff93dfd38d954f94891edb9b86fa2c3"
+  },
+  "proxies": [
+    {
+      "address": "0x1Ab8e6dD7C8CAa2a7B5B5dE6969D985e174Ce0DB",
+      "txHash": "0x6d77c13ef958af968d6dfc4d386dd477b611d98e0bd1a41a8b38020c7e0b0dae",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x920faB26023d77f145a91D15148f47cE91A07df1",
+      "txHash": "0xaed299f9995a2344a3980a6b4d9d581a7c00af8fc8ff91fd41360fd9c888ca82",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x2D098f4cc4A920C3DA5a25EdcF3297964f61E827",
+      "txHash": "0x4d9579544225843c13efa46a14d55c2e4a47844057fcddc6f2a7956d0ad14d3a",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x5E43E6955f91Ff23E61F0354DAd1979ac0070DD0",
+      "txHash": "0x54698593a32c4005d1ffd83c5863ded9d0a79af31a694527ea79d6f9ee67def7",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x6735FF965ECF122Fef685E6C5C732BF07c1a1d2E",
+      "txHash": "0x630326132fbee22ec8c4952315a6d80e0036a68e81e8c999ff926196956e0617",
+      "kind": "transparent"
+    },
+    {
+      "address": "0xccBA4208664Fa6a86Ed34E70192A6d136Ad22F50",
+      "txHash": "0xbe993b8fcf11b3027f38d69ee2680e888c755fe84302c3fd55b805060e5dd1d7",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x46e037267319256F9A3cc1fb074f360427D9BF7C",
+      "txHash": "0x70b210aea43e9e759a08d8b0a55809b13ee7d71d9a4500bf7767a3869f2d5257",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x60EA0818496725bde1409FAE3B63DFE5Be94Ad0D",
+      "txHash": "0xeb201af4d46fd9ec40319dfced49b19be215bb7dccc51a84901ad199465fc7fd",
+      "kind": "transparent"
+    },
+    {
+      "address": "0xfD909101E1893C6E60996Acf451c701931D1C40D",
+      "txHash": "0x0e05e3d8503f71b3ed8a183310ec046d8c2ad66736af247d16b1a413ac710d34",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x62941EEf1Bf2230783E453b5ED42A3ab2e05011f",
+      "txHash": "0x1d9d29e38b67e784b4f80f555e2351b2dbc0d14f4580e7bd0d577dce1821e17d",
+      "kind": "transparent"
+    }
+  ],
+  "impls": {
+    "1c894c1ba10804dd83bbca8e9d06f6fef4860875f4602b79355108f69a1499a1": {
+      "address": "0xFF1ab192D83b5971c103B46de71B5a5621f2a237",
+      "txHash": "0x30d873a146531c9f2db312a0697834526825a6bb47eeb3d7718a77b728a5dec9",
+      "layout": {
+        "solcVersion": "0.8.19",
+        "storage": [
+          {
+            "label": "markets",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_mapping(t_address,t_struct(Market)1927_storage)",
+            "contract": "ComptrollerInterface",
+            "src": "contract/ComptrollerInterface.sol:17"
+          },
+          {
+            "label": "admin",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_address",
+            "contract": "ComptrollerInterface",
+            "src": "contract/ComptrollerInterface.sol:19"
+          },
+          {
+            "label": "_initialized",
+            "offset": 20,
+            "slot": "1",
+            "type": "t_uint8",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:63",
+            "retypedFrom": "bool"
+          },
+          {
+            "label": "_initializing",
+            "offset": 21,
+            "slot": "1",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:68"
+          },
+          {
+            "label": "collateralFactor",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_uint256",
+            "contract": "Comptroller",
+            "src": "contract/Comptroller.sol:9"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_struct(Market)1927_storage)": {
+            "label": "mapping(address => struct ComptrollerInterface.Market)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(Market)1927_storage": {
+            "label": "struct ComptrollerInterface.Market",
+            "members": [
+              {
+                "label": "isListed",
+                "type": "t_bool",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "collateralFactor",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "accountMembership",
+                "type": "t_mapping(t_address,t_bool)",
+                "offset": 0,
+                "slot": "2"
+              }
+            ],
+            "numberOfBytes": "96"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        }
+      }
+    },
+    "9071bee533d362d2a419757fe47453f1aa8a04563ab26b87865d5362f47b9362": {
+      "address": "0x3E19D349F09B988802e56A5CbD5e8d30499d8AB9",
+      "txHash": "0xfa02f14d267ee9fbdaa88681735653d85ce8c50e2a63d559fcaf74c69b742ab9",
+      "layout": {
+        "solcVersion": "0.8.19",
+        "storage": [
+          {
+            "label": "_notEntered",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "CTokenStorage",
+            "src": "contract/CTokenInterface.sol:10"
+          },
+          {
+            "label": "comptroller_",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_address",
+            "contract": "CTokenStorage",
+            "src": "contract/CTokenInterface.sol:12"
+          },
+          {
+            "label": "name",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_string_storage",
+            "contract": "CTokenStorage",
+            "src": "contract/CTokenInterface.sol:17"
+          },
+          {
+            "label": "symbol",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_string_storage",
+            "contract": "CTokenStorage",
+            "src": "contract/CTokenInterface.sol:22"
+          },
+          {
+            "label": "decimals",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_uint8",
+            "contract": "CTokenStorage",
+            "src": "contract/CTokenInterface.sol:27"
+          },
+          {
+            "label": "admin",
+            "offset": 1,
+            "slot": "3",
+            "type": "t_address_payable",
+            "contract": "CTokenStorage",
+            "src": "contract/CTokenInterface.sol:38"
+          },
+          {
+            "label": "pendingAdmin",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_address_payable",
+            "contract": "CTokenStorage",
+            "src": "contract/CTokenInterface.sol:43"
+          },
+          {
+            "label": "interestRateModel",
+            "offset": 0,
+            "slot": "5",
+            "type": "t_contract(InterestRateModel)2625",
+            "contract": "CTokenStorage",
+            "src": "contract/CTokenInterface.sol:53"
+          },
+          {
+            "label": "initialExchangeRateMantissa",
+            "offset": 0,
+            "slot": "6",
+            "type": "t_uint256",
+            "contract": "CTokenStorage",
+            "src": "contract/CTokenInterface.sol:56"
+          },
+          {
+            "label": "reserveFactorMantissa",
+            "offset": 0,
+            "slot": "7",
+            "type": "t_uint256",
+            "contract": "CTokenStorage",
+            "src": "contract/CTokenInterface.sol:61"
+          },
+          {
+            "label": "accrualBlockNumber",
+            "offset": 0,
+            "slot": "8",
+            "type": "t_uint256",
+            "contract": "CTokenStorage",
+            "src": "contract/CTokenInterface.sol:66"
+          },
+          {
+            "label": "borrowIndex",
+            "offset": 0,
+            "slot": "9",
+            "type": "t_uint256",
+            "contract": "CTokenStorage",
+            "src": "contract/CTokenInterface.sol:71"
+          },
+          {
+            "label": "totalBorrows",
+            "offset": 0,
+            "slot": "10",
+            "type": "t_uint256",
+            "contract": "CTokenStorage",
+            "src": "contract/CTokenInterface.sol:76"
+          },
+          {
+            "label": "totalReserves",
+            "offset": 0,
+            "slot": "11",
+            "type": "t_uint256",
+            "contract": "CTokenStorage",
+            "src": "contract/CTokenInterface.sol:81"
+          },
+          {
+            "label": "totalSupply",
+            "offset": 0,
+            "slot": "12",
+            "type": "t_uint256",
+            "contract": "CTokenStorage",
+            "src": "contract/CTokenInterface.sol:86"
+          },
+          {
+            "label": "price",
+            "offset": 0,
+            "slot": "13",
+            "type": "t_mapping(t_address,t_uint256)",
+            "contract": "CTokenStorage",
+            "src": "contract/CTokenInterface.sol:88"
+          },
+          {
+            "label": "borrowBalance",
+            "offset": 0,
+            "slot": "14",
+            "type": "t_mapping(t_address,t_uint256)",
+            "contract": "CTokenStorage",
+            "src": "contract/CTokenInterface.sol:90"
+          },
+          {
+            "label": "accountTokens",
+            "offset": 0,
+            "slot": "15",
+            "type": "t_mapping(t_address,t_mapping(t_string_memory_ptr,t_uint256))",
+            "contract": "CTokenStorage",
+            "src": "contract/CTokenInterface.sol:93"
+          },
+          {
+            "label": "transferAllowances",
+            "offset": 0,
+            "slot": "16",
+            "type": "t_mapping(t_address,t_mapping(t_address,t_uint256))",
+            "contract": "CTokenStorage",
+            "src": "contract/CTokenInterface.sol:96"
+          },
+          {
+            "label": "accountBorrows",
+            "offset": 0,
+            "slot": "17",
+            "type": "t_mapping(t_address,t_struct(BorrowSnapshot)1418_storage)",
+            "contract": "CTokenStorage",
+            "src": "contract/CTokenInterface.sol:109"
+          },
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "18",
+            "type": "t_uint8",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:63",
+            "retypedFrom": "bool"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "18",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:68"
+          },
+          {
+            "label": "comptroller",
+            "offset": 2,
+            "slot": "18",
+            "type": "t_contract(ComptrollerInterface)2000",
+            "contract": "CToken",
+            "src": "contract/CToken.sol:11"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_address_payable": {
+            "label": "address payable",
+            "numberOfBytes": "20"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_contract(ComptrollerInterface)2000": {
+            "label": "contract ComptrollerInterface",
+            "numberOfBytes": "20"
+          },
+          "t_contract(InterestRateModel)2625": {
+            "label": "contract InterestRateModel",
+            "numberOfBytes": "20"
+          },
+          "t_mapping(t_address,t_mapping(t_address,t_uint256))": {
+            "label": "mapping(address => mapping(address => uint256))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_mapping(t_string_memory_ptr,t_uint256))": {
+            "label": "mapping(address => mapping(string => uint256))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_struct(BorrowSnapshot)1418_storage)": {
+            "label": "mapping(address => struct CTokenStorage.BorrowSnapshot)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_string_memory_ptr,t_uint256)": {
+            "label": "mapping(string => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_string_memory_ptr": {
+            "label": "string",
+            "numberOfBytes": "32"
+          },
+          "t_string_storage": {
+            "label": "string",
+            "numberOfBytes": "32"
+          },
+          "t_struct(BorrowSnapshot)1418_storage": {
+            "label": "struct CTokenStorage.BorrowSnapshot",
+            "members": [
+              {
+                "label": "principal",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "interestIndex",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        }
+      }
+    },
+    "f5d7d7825d3aebaed2896b88dcbf7cdfdc00ab0577bd4293ea14141b28b7f5a0": {
+      "address": "0x5fFc2e3cbbF06c957cA28c0B384F3A4278643864",
+      "txHash": "0x0eb4ac6f43ab76944098da113b8dd1ebf0fedaf8296e810d8fc986dd0c2be58d",
+      "layout": {
+        "solcVersion": "0.8.19",
+        "storage": [
+          {
+            "label": "_notEntered",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "CTokenStorage",
+            "src": "contract/CTokenInterface.sol:10"
+          },
+          {
+            "label": "comptroller_",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_address",
+            "contract": "CTokenStorage",
+            "src": "contract/CTokenInterface.sol:12"
+          },
+          {
+            "label": "name",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_string_storage",
+            "contract": "CTokenStorage",
+            "src": "contract/CTokenInterface.sol:17"
+          },
+          {
+            "label": "symbol",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_string_storage",
+            "contract": "CTokenStorage",
+            "src": "contract/CTokenInterface.sol:22"
+          },
+          {
+            "label": "decimals",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_uint8",
+            "contract": "CTokenStorage",
+            "src": "contract/CTokenInterface.sol:27"
+          },
+          {
+            "label": "admin",
+            "offset": 1,
+            "slot": "3",
+            "type": "t_address_payable",
+            "contract": "CTokenStorage",
+            "src": "contract/CTokenInterface.sol:38"
+          },
+          {
+            "label": "pendingAdmin",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_address_payable",
+            "contract": "CTokenStorage",
+            "src": "contract/CTokenInterface.sol:43"
+          },
+          {
+            "label": "interestRateModel",
+            "offset": 0,
+            "slot": "5",
+            "type": "t_contract(InterestRateModel)2635",
+            "contract": "CTokenStorage",
+            "src": "contract/CTokenInterface.sol:53"
+          },
+          {
+            "label": "initialExchangeRateMantissa",
+            "offset": 0,
+            "slot": "6",
+            "type": "t_uint256",
+            "contract": "CTokenStorage",
+            "src": "contract/CTokenInterface.sol:56"
+          },
+          {
+            "label": "reserveFactorMantissa",
+            "offset": 0,
+            "slot": "7",
+            "type": "t_uint256",
+            "contract": "CTokenStorage",
+            "src": "contract/CTokenInterface.sol:61"
+          },
+          {
+            "label": "accrualBlockNumber",
+            "offset": 0,
+            "slot": "8",
+            "type": "t_uint256",
+            "contract": "CTokenStorage",
+            "src": "contract/CTokenInterface.sol:66"
+          },
+          {
+            "label": "borrowIndex",
+            "offset": 0,
+            "slot": "9",
+            "type": "t_uint256",
+            "contract": "CTokenStorage",
+            "src": "contract/CTokenInterface.sol:71"
+          },
+          {
+            "label": "totalBorrows",
+            "offset": 0,
+            "slot": "10",
+            "type": "t_uint256",
+            "contract": "CTokenStorage",
+            "src": "contract/CTokenInterface.sol:76"
+          },
+          {
+            "label": "totalReserves",
+            "offset": 0,
+            "slot": "11",
+            "type": "t_uint256",
+            "contract": "CTokenStorage",
+            "src": "contract/CTokenInterface.sol:81"
+          },
+          {
+            "label": "totalSupply",
+            "offset": 0,
+            "slot": "12",
+            "type": "t_uint256",
+            "contract": "CTokenStorage",
+            "src": "contract/CTokenInterface.sol:86"
+          },
+          {
+            "label": "price",
+            "offset": 0,
+            "slot": "13",
+            "type": "t_mapping(t_address,t_uint256)",
+            "contract": "CTokenStorage",
+            "src": "contract/CTokenInterface.sol:88"
+          },
+          {
+            "label": "borrowBalance",
+            "offset": 0,
+            "slot": "14",
+            "type": "t_mapping(t_address,t_uint256)",
+            "contract": "CTokenStorage",
+            "src": "contract/CTokenInterface.sol:90"
+          },
+          {
+            "label": "accountTokens",
+            "offset": 0,
+            "slot": "15",
+            "type": "t_mapping(t_address,t_mapping(t_string_memory_ptr,t_uint256))",
+            "contract": "CTokenStorage",
+            "src": "contract/CTokenInterface.sol:93"
+          },
+          {
+            "label": "transferAllowances",
+            "offset": 0,
+            "slot": "16",
+            "type": "t_mapping(t_address,t_mapping(t_address,t_uint256))",
+            "contract": "CTokenStorage",
+            "src": "contract/CTokenInterface.sol:96"
+          },
+          {
+            "label": "accountBorrows",
+            "offset": 0,
+            "slot": "17",
+            "type": "t_mapping(t_address,t_struct(BorrowSnapshot)1426_storage)",
+            "contract": "CTokenStorage",
+            "src": "contract/CTokenInterface.sol:109"
+          },
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "18",
+            "type": "t_uint8",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:63",
+            "retypedFrom": "bool"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "18",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:68"
+          },
+          {
+            "label": "comptroller",
+            "offset": 2,
+            "slot": "18",
+            "type": "t_contract(ComptrollerInterface)2008",
+            "contract": "CToken",
+            "src": "contract/CToken.sol:11"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_address_payable": {
+            "label": "address payable",
+            "numberOfBytes": "20"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_contract(ComptrollerInterface)2008": {
+            "label": "contract ComptrollerInterface",
+            "numberOfBytes": "20"
+          },
+          "t_contract(InterestRateModel)2635": {
+            "label": "contract InterestRateModel",
+            "numberOfBytes": "20"
+          },
+          "t_mapping(t_address,t_mapping(t_address,t_uint256))": {
+            "label": "mapping(address => mapping(address => uint256))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_mapping(t_string_memory_ptr,t_uint256))": {
+            "label": "mapping(address => mapping(string => uint256))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_struct(BorrowSnapshot)1426_storage)": {
+            "label": "mapping(address => struct CTokenStorage.BorrowSnapshot)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_string_memory_ptr,t_uint256)": {
+            "label": "mapping(string => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_string_memory_ptr": {
+            "label": "string",
+            "numberOfBytes": "32"
+          },
+          "t_string_storage": {
+            "label": "string",
+            "numberOfBytes": "32"
+          },
+          "t_struct(BorrowSnapshot)1426_storage": {
+            "label": "struct CTokenStorage.BorrowSnapshot",
+            "members": [
+              {
+                "label": "principal",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "interestIndex",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        }
+      }
+    },
+    "7cb4d07f340b6396d5253f847c390e8851d73b3530e37a0c293ae70c5123244e": {
+      "address": "0xe9Ca9C03e8dAfcce7081213D03427407F4fd267D",
+      "txHash": "0x22feaadf7101c80cd040178a7631d0b075022d50c8725671f3a1c52c84dc8bda",
+      "layout": {
+        "solcVersion": "0.8.19",
+        "storage": [
+          {
+            "label": "markets",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_mapping(t_address,t_struct(Market)2196_storage)",
+            "contract": "ComptrollerInterface",
+            "src": "contract/ComptrollerInterface.sol:17"
+          },
+          {
+            "label": "accountAssets",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_mapping(t_address,t_array(t_contract(CToken)1313)dyn_storage)",
+            "contract": "ComptrollerInterface",
+            "src": "contract/ComptrollerInterface.sol:18"
+          },
+          {
+            "label": "accountLiquidity",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_mapping(t_address,t_uint256)",
+            "contract": "ComptrollerInterface",
+            "src": "contract/ComptrollerInterface.sol:19"
+          },
+          {
+            "label": "admin",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_address",
+            "contract": "ComptrollerInterface",
+            "src": "contract/ComptrollerInterface.sol:21"
+          },
+          {
+            "label": "_initialized",
+            "offset": 20,
+            "slot": "3",
+            "type": "t_uint8",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:63",
+            "retypedFrom": "bool"
+          },
+          {
+            "label": "_initializing",
+            "offset": 21,
+            "slot": "3",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:68"
+          },
+          {
+            "label": "collateralFactor",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_uint256",
+            "contract": "Comptroller",
+            "src": "contract/Comptroller.sol:9"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_contract(CToken)1313)dyn_storage": {
+            "label": "contract CToken[]",
+            "numberOfBytes": "32"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_contract(CToken)1313": {
+            "label": "contract CToken",
+            "numberOfBytes": "20"
+          },
+          "t_mapping(t_address,t_array(t_contract(CToken)1313)dyn_storage)": {
+            "label": "mapping(address => contract CToken[])",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_struct(Market)2196_storage)": {
+            "label": "mapping(address => struct ComptrollerInterface.Market)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(Market)2196_storage": {
+            "label": "struct ComptrollerInterface.Market",
+            "members": [
+              {
+                "label": "isListed",
+                "type": "t_bool",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "collateralFactor",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "accountMembership",
+                "type": "t_mapping(t_address,t_bool)",
+                "offset": 0,
+                "slot": "2"
+              }
+            ],
+            "numberOfBytes": "96"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        }
+      }
+    },
+    "b4ab16fe29eae115123a95cded36bdd52daafa590478d6046c56f1d2ddbc2a32": {
+      "address": "0xD9142b179D9bc8CF3FeD06C668a3ED2bc1a560d5",
+      "txHash": "0x62db02ba1e3e1d7e4a6fb57af9c8747287fe0e83d410c08129e2101add71154b",
+      "layout": {
+        "solcVersion": "0.8.19",
+        "storage": [
+          {
+            "label": "_notEntered",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "CTokenStorage",
+            "src": "contract/CTokenInterface.sol:10"
+          },
+          {
+            "label": "comptroller_",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_address",
+            "contract": "CTokenStorage",
+            "src": "contract/CTokenInterface.sol:12"
+          },
+          {
+            "label": "name",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_string_storage",
+            "contract": "CTokenStorage",
+            "src": "contract/CTokenInterface.sol:17"
+          },
+          {
+            "label": "symbol",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_string_storage",
+            "contract": "CTokenStorage",
+            "src": "contract/CTokenInterface.sol:22"
+          },
+          {
+            "label": "decimals",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_uint8",
+            "contract": "CTokenStorage",
+            "src": "contract/CTokenInterface.sol:27"
+          },
+          {
+            "label": "underlying",
+            "offset": 1,
+            "slot": "3",
+            "type": "t_address",
+            "contract": "CTokenStorage",
+            "src": "contract/CTokenInterface.sol:32"
+          },
+          {
+            "label": "admin",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_address_payable",
+            "contract": "CTokenStorage",
+            "src": "contract/CTokenInterface.sol:43"
+          },
+          {
+            "label": "pendingAdmin",
+            "offset": 0,
+            "slot": "5",
+            "type": "t_address_payable",
+            "contract": "CTokenStorage",
+            "src": "contract/CTokenInterface.sol:48"
+          },
+          {
+            "label": "interestRateModel",
+            "offset": 0,
+            "slot": "6",
+            "type": "t_contract(InterestRateModel)2923",
+            "contract": "CTokenStorage",
+            "src": "contract/CTokenInterface.sol:58"
+          },
+          {
+            "label": "initialExchangeRateMantissa",
+            "offset": 0,
+            "slot": "7",
+            "type": "t_uint256",
+            "contract": "CTokenStorage",
+            "src": "contract/CTokenInterface.sol:61"
+          },
+          {
+            "label": "reserveFactorMantissa",
+            "offset": 0,
+            "slot": "8",
+            "type": "t_uint256",
+            "contract": "CTokenStorage",
+            "src": "contract/CTokenInterface.sol:66"
+          },
+          {
+            "label": "accrualBlockNumber",
+            "offset": 0,
+            "slot": "9",
+            "type": "t_uint256",
+            "contract": "CTokenStorage",
+            "src": "contract/CTokenInterface.sol:71"
+          },
+          {
+            "label": "borrowIndex",
+            "offset": 0,
+            "slot": "10",
+            "type": "t_uint256",
+            "contract": "CTokenStorage",
+            "src": "contract/CTokenInterface.sol:76"
+          },
+          {
+            "label": "totalBorrows",
+            "offset": 0,
+            "slot": "11",
+            "type": "t_uint256",
+            "contract": "CTokenStorage",
+            "src": "contract/CTokenInterface.sol:81"
+          },
+          {
+            "label": "totalReserves",
+            "offset": 0,
+            "slot": "12",
+            "type": "t_uint256",
+            "contract": "CTokenStorage",
+            "src": "contract/CTokenInterface.sol:86"
+          },
+          {
+            "label": "totalSupply",
+            "offset": 0,
+            "slot": "13",
+            "type": "t_uint256",
+            "contract": "CTokenStorage",
+            "src": "contract/CTokenInterface.sol:91"
+          },
+          {
+            "label": "price",
+            "offset": 0,
+            "slot": "14",
+            "type": "t_mapping(t_address,t_uint256)",
+            "contract": "CTokenStorage",
+            "src": "contract/CTokenInterface.sol:93"
+          },
+          {
+            "label": "borrowBalance",
+            "offset": 0,
+            "slot": "15",
+            "type": "t_mapping(t_address,t_uint256)",
+            "contract": "CTokenStorage",
+            "src": "contract/CTokenInterface.sol:95"
+          },
+          {
+            "label": "accountTokens",
+            "offset": 0,
+            "slot": "16",
+            "type": "t_mapping(t_address,t_uint256)",
+            "contract": "CTokenStorage",
+            "src": "contract/CTokenInterface.sol:98"
+          },
+          {
+            "label": "transferAllowances",
+            "offset": 0,
+            "slot": "17",
+            "type": "t_mapping(t_address,t_mapping(t_address,t_uint256))",
+            "contract": "CTokenStorage",
+            "src": "contract/CTokenInterface.sol:101"
+          },
+          {
+            "label": "accountBorrows",
+            "offset": 0,
+            "slot": "18",
+            "type": "t_mapping(t_address,t_struct(BorrowSnapshot)1392_storage)",
+            "contract": "CTokenStorage",
+            "src": "contract/CTokenInterface.sol:114"
+          },
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "19",
+            "type": "t_uint8",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:63",
+            "retypedFrom": "bool"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "19",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:68"
+          },
+          {
+            "label": "comptroller",
+            "offset": 2,
+            "slot": "19",
+            "type": "t_contract(ComptrollerInterface)2296",
+            "contract": "CToken",
+            "src": "contract/CToken.sol:11"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_address_payable": {
+            "label": "address payable",
+            "numberOfBytes": "20"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_contract(ComptrollerInterface)2296": {
+            "label": "contract ComptrollerInterface",
+            "numberOfBytes": "20"
+          },
+          "t_contract(InterestRateModel)2923": {
+            "label": "contract InterestRateModel",
+            "numberOfBytes": "20"
+          },
+          "t_mapping(t_address,t_mapping(t_address,t_uint256))": {
+            "label": "mapping(address => mapping(address => uint256))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_struct(BorrowSnapshot)1392_storage)": {
+            "label": "mapping(address => struct CTokenStorage.BorrowSnapshot)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_string_storage": {
+            "label": "string",
+            "numberOfBytes": "32"
+          },
+          "t_struct(BorrowSnapshot)1392_storage": {
+            "label": "struct CTokenStorage.BorrowSnapshot",
+            "members": [
+              {
+                "label": "principal",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "interestIndex",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        }
+      }
+    }
+  }
+}

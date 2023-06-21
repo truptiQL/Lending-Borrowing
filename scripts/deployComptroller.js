@@ -5,15 +5,22 @@
 // will compile your contracts, add the Hardhat Runtime Environment's members to the
 // global scope, and execute the script.
 const hre = require("hardhat");
+let comptroller;
 
 async function main() {
-  const LendingAndBorrowing = await ethers.getContractFactory("LendingAndBorrowing");
-  const lendingAndBorrowing = await upgrades.deployProxy(LendingAndBorrowing);
-  await lendingAndBorrowing.deployed();
-  console.log("lendingAndBorrowing contract deployed to: ", lendingAndBorrowing.address);
+  const Comptroller = await ethers.getContractFactory("Comptroller");
+  comptroller = await upgrades.deployProxy(Comptroller);
+  await comptroller.deployed();
+  console.log("comptroller contract deployed to: ", comptroller.address);
+  // TO verify the contract
+  await hre.run("verify:verify", {
+    address: comptroller.address,
+  });
 }
 
 main().catch((error) => {
   console.error(error);
   process.exitCode = 1;
 });
+// 0x60EA0818496725bde1409FAE3B63DFE5Be94Ad0D : proxy
+// 0xe9Ca9C03e8dAfcce7081213D03427407F4fd267D : Implementation

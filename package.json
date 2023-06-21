@@ -1,11 +1,17 @@
 {
   "name": "hardhat-project",
   "devDependencies": {
+    "@nomicfoundation/hardhat-network-helpers": "^1.0.8",
     "@nomicfoundation/hardhat-toolbox": "^2.0.2",
     "hardhat": "^2.15.0"
   },
   "dependencies": {
+    "@openzeppelin/contracts-upgradeable": "^4.9.2",
+    "@openzeppelin/hardhat-upgrades": "^1.28.0",
     "chai": "^4.3.7",
+    "dotenv": "^16.2.0",
+    "forge": "^2.3.0",
+    "foundry": "^4.7.0",
     "hardhat-deploy": "^0.11.30",
     "mocha": "^10.2.0"
   }

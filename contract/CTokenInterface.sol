@@ -9,7 +9,7 @@ contract CTokenStorage {
      */
     bool internal _notEntered;
 
-    address LendingAndBorrowing;
+    address internal comptroller_;
 
     /**
      * @notice EIP-20 token name for this token
@@ -25,6 +25,11 @@ contract CTokenStorage {
      * @notice EIP-20 token decimals for this token
      */
     uint8 public decimals;
+
+    /**
+     * @notice underlying token address
+     * */
+    address public underlying;
 
     // Maximum borrow rate that can ever be applied (.0005% / block)
     uint internal constant borrowRateMaxMantissa = 0.0005e16;
@@ -263,13 +268,21 @@ abstract contract CTokenInterface is CTokenStorage {
 
     function getSupplyRate() internal virtual returns (uint256);
 
-    function currentExchangeRate() internal virtual returns (uint);
+    function currentExchangeRate() public virtual returns (uint);
 
-    function mintToken(uint256, address) internal virtual;
+    function mintToken(uint256) public virtual;
 
-    function redeemTokens(address, uint256, address) internal virtual;
+    function redeemTokens(address, uint256) public virtual;
 
-    function borrow(address, uint256, address) internal virtual;
+    function borrow(address, uint256) public virtual;
 
-    function repayBorrow(address, uint256, address) internal virtual;
+    function repayBorrow(address, uint256) public virtual;
+
+    function accrueInterest() public virtual;
+
+    function getCashPrior() internal view virtual returns (uint256);
+
+    function getAccountSnapshot(
+        address account
+    ) external view virtual returns (uint, uint, uint);
 }

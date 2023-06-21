@@ -1,20 +1,33 @@
 // SPDX-License-Identifier: Unlicense
 pragma solidity 0.8.19;
 
-
-import "./LendingAndBorrowingInterface.sol";
+import "./ComptrollerInterface.sol";
 import "./InterestRateModel.sol";
 import "./CTokenInterface.sol";
-import "./LendingAndBorrowingInterface.sol";
+import "./ERC20.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
- contract CToken is CTokenInterface {
+contract CToken is CTokenInterface, Initializable {
+    ComptrollerInterface comptroller;
+
     function initialize(
-    ) public {
+        string memory _name,
+        string memory _symbol,
+        uint8 _decimals,
+        address _comptroller,
+        address _interestRateModel,
+        address _underlying
+    ) public initializer {
+        name = _name;
+        symbol = _symbol;
+        decimals = _decimals;
         _notEntered = true;
-    }
+        comptroller_ = _comptroller;
+        interestRateModel = InterestRateModel(_interestRateModel);
+        underlying = _underlying;
 
-    LendingAndBorrowingInterface internal comptroller =
-        LendingAndBorrowingInterface(LendingAndBorrowing);
+        comptroller = ComptrollerInterface(comptroller_);
+    }
 
     modifier nonReentrant() {
         require(_notEntered, "re-entered");
@@ -30,11 +43,6 @@ import "./LendingAndBorrowingInterface.sol";
         uint tokens
     ) internal returns (bool) {
         /* Fail if transfer not allowed */
-
-        require(
-            !comptroller.isUnderwater(src, tokens),
-            "Account is underwater"
-        );
 
         /* Do not allow self-transfers */
         if (src == dst) {
@@ -139,27 +147,89 @@ import "./LendingAndBorrowingInterface.sol";
      * @param owner The address of the account to query
      * @return The number of tokens owned by `owner`
      */
-    function balanceOf(address owner) external view override returns (uint256) {
+    function balanceOf(address owner) public view override returns (uint256) {
         return accountTokens[owner];
     }
 
     function balanceOfUnderlying(
         address owner
-    ) public override view returns (uint256) {
+    ) public view override returns (uint256) {
         return (currentExchangeRate() * accountTokens[owner]);
     }
 
+    function accrueInterest() public virtual override {
+        /* Remember the initial block number */
+        uint currentBlockNumber = block.number;
+        uint accrualBlockNumberPrior = accrualBlockNumber;
+
+        /* Short-circuit accumulating 0 interest */
+        if (accrualBlockNumberPrior == currentBlockNumber) {
+            /* Read the previous values out of storage */
+            uint cashPrior = getCashPrior();
+            uint borrowsPrior = totalBorrows;
+            uint reservesPrior = totalReserves;
+            uint borrowIndexPrior = borrowIndex;
+
+            /* Calculate the current borrow interest rate */
+            uint borrowRateMantissa = interestRateModel.getBorrowRate(
+                cashPrior,
+                borrowsPrior,
+                reservesPrior
+            );
+            require(
+                borrowRateMantissa <= borrowRateMaxMantissa,
+                "borrow rate is absurdly high"
+            );
+
+            /* Calculate the number of blocks elapsed since the last accrual */
+            uint blockDelta = currentBlockNumber - accrualBlockNumberPrior;
+
+            /*
+             * Calculate the interest accumulated into borrows and reserves and the new index:
+             *  simpleInterestFactor = borrowRate * blockDelta
+             *  interestAccumulated = simpleInterestFactor * totalBorrows
+             *  totalBorrowsNew = interestAccumulated + totalBorrows
+             *  totalReservesNew = interestAccumulated * reserveFactor + totalReserves
+             *  borrowIndexNew = simpleInterestFactor * borrowIndex + borrowIndex
+             */
+            uint simpleInterestFactor = borrowRateMantissa * blockDelta;
+            uint interestAccumulated = simpleInterestFactor * borrowsPrior;
+            uint totalBorrowsNew = interestAccumulated + borrowsPrior;
+            uint totalReservesNew = interestAccumulated * 1 + reservesPrior;
+            uint borrowIndexNew = simpleInterestFactor *
+                borrowIndexPrior +
+                borrowIndexPrior;
+
+            /////////////////////////
+            // EFFECTS & INTERACTIONS
+            // (No safe failures beyond this point)
+
+            /* We write the previously calculated values into storage */
+            accrualBlockNumber = currentBlockNumber;
+            borrowIndex = borrowIndexNew;
+            totalBorrows = totalBorrowsNew;
+            totalReserves = totalReservesNew;
+
+            /* We emit an AccrueInterest event */
+            emit AccrueInterest(
+                cashPrior,
+                interestAccumulated,
+                borrowIndexNew,
+                totalBorrowsNew
+            );
+        }
+    }
+
     /// @param mintAmount number of underlying assets
-    function mintToken(uint256 mintAmount, address underlyingToken) internal override {
+    function mintToken(uint256 mintAmount) public override {
+        accrueInterest();
+
+        ComptrollerInterface(comptroller).mintAllowed(address(this));
+
         address cToken = address(this);
         address minter = msg.sender;
-
         require(
-            CToken(underlyingToken).transferFrom(
-                minter,
-                cToken,
-                mintAmount
-            ),
+            IERC20(underlying).transferFrom(minter, cToken, mintAmount),
             "underlying not received"
         );
 
@@ -174,99 +244,132 @@ import "./LendingAndBorrowingInterface.sol";
 
     function redeemTokens(
         address redeemer,
-        uint256 _redeemTokens,
-        address underlying
-    ) internal override {
-        require(
-            comptroller.redeemAllowed(address(this), redeemer),
-            "redeem not allowed"
+        uint256 _redeemTokens
+    ) public override {
+        accrueInterest();
+
+        ComptrollerInterface(comptroller).redeemAllowed(
+            address(this),
+            redeemer,
+            _redeemTokens
         );
 
-        if (accountTokens[address(this)] < _redeemTokens) {
+        if (accountTokens[redeemer] < _redeemTokens) {
             revert();
         }
 
-        totalSupply -= _redeemTokens ;
-        accountTokens[redeemer] += accountTokens[redeemer] - _redeemTokens;
+        totalSupply -= _redeemTokens;
+        accountTokens[redeemer] -= accountTokens[redeemer] - _redeemTokens;
 
-        uint256 redeemAmount = _redeemTokens *
-            currentExchangeRate();
+        uint256 redeemAmount = _redeemTokens * currentExchangeRate();
 
         require(
-            CToken(underlying).transferFrom(
-                address(this),
-                redeemer,
-                redeemAmount
-            ),
+            IERC20(underlying).transfer(redeemer, redeemAmount),
             "not transfered"
         );
 
         emit Redeem(redeemer, _redeemTokens);
     }
 
-    function borrow(
-        address borrower,
-        uint256 borrowAmount,
-        address underlying
-    ) internal override {
-        // CHECK for underwater??
+    // It will work for borrow and borrowOnbehalf also
+    function borrow(address borrower, uint256 borrowAmount) public override {
+        accrueInterest();
         require(
-            CToken(underlying).balanceOf(address(this)) > borrowAmount,
+            getCashPrior() > borrowAmount,
             "This much amount is not available"
         );
-        require(
-            !comptroller.isUnderwater(address(this), borrowBalance[msg.sender]),
-            "Underwater account"
+
+        ComptrollerInterface(comptroller).borrowAllowed(
+            address(this),
+            borrower,
+            borrowBalance[borrower] + borrowAmount
         );
-        require(comptroller.borrowAllowed(address(this)), "market not listed");
+
         borrowBalance[borrower] += borrowAmount;
         totalBorrows += borrowAmount;
 
-        CToken(underlying).transferFrom(address(this), borrower, borrowAmount);
+        IERC20(underlying).transfer(borrower, borrowAmount);
+
+        emit Borrow(
+            borrower,
+            borrowAmount,
+            borrowBalance[borrower],
+            totalBorrows
+        );
     }
 
     function repayBorrow(
         address borrower,
-        uint256 repayAmount,
-        address underlying
-    ) internal override {
+        uint256 repayAmount
+    ) public override {
+        accrueInterest();
+
         require(
             borrowBalance[borrower] >= repayAmount,
             "Invalid borrow amount"
         );
-        CToken(underlying).transferFrom(borrower, address(this), repayAmount);
+        IERC20(underlying).transferFrom(msg.sender, address(this), repayAmount);
 
         borrowBalance[borrower] -= repayAmount;
         totalBorrows -= repayAmount;
+
+         emit RepayBorrow(msg.sender, borrower, repayAmount, borrowBalance[borrower], totalBorrows);
+
     }
 
-     function currentExchangeRate() override internal view returns (uint) {
+    function currentExchangeRate() public view override returns (uint) {
         uint _totalSupply = totalSupply;
         if (_totalSupply == 0) {
             /*
              * If there are no tokens minted:
              *  exchangeRate = initialExchangeRate
              */
-            return 1;
+            return 1; // let  initialExchangeRate = 1 (Atual = 0.020 or set in initializer)
         } else {
             /*
              * Otherwise:
              *  exchangeRate = (totalCash + totalBorrows - totalReserves) / totalSupply
              */
-            uint totalCash = 200;
-            uint cashPlusBorrowsMinusReserves = totalCash + totalBorrows - totalReserves;
+            uint totalCash = getCashPrior();
+            uint cashPlusBorrowsMinusReserves = totalCash +
+                totalBorrows -
+                totalReserves;
             uint exchangeRate = cashPlusBorrowsMinusReserves / _totalSupply;
 
             return exchangeRate;
         }
     }
 
-    function getBorrowRate() internal override view returns(uint256) {
-         return interestRateModel.borrowRate(200, totalBorrows, totalReserves);
+    function getCashPrior() internal view override returns (uint256) {
+        return IERC20(underlying).balanceOf(address(this));
     }
 
-    function getSupplyRate() internal override view returns(uint256) {
-         return interestRateModel.supplyRate(200, totalBorrows, totalReserves, 1);
+    function getBorrowRate() internal view override returns (uint256) {
+        return
+            interestRateModel.getBorrowRate(
+                getCashPrior(),
+                totalBorrows,
+                totalReserves
+            );
     }
 
+    function getSupplyRate() internal view override returns (uint256) {
+        return
+            interestRateModel.getSupplyRate(
+                getCashPrior(),
+                totalBorrows,
+                totalReserves,
+                reserveFactorMantissa
+            );
+    }
+
+    function getAccountSnapshot(
+        address account
+    ) external view override returns (uint, uint, uint) {
+        return (
+            accountTokens[account],
+            borrowBalance[account],
+            currentExchangeRate()
+        );
+    }
 }
