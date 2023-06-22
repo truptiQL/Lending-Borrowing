@@ -30,19 +30,11 @@ abstract contract ComptrollerInterface {
 
     function exitMarket(address cToken) external virtual;
 
-    function redeemAllowed(
-        address cToken,
-        address redeemer,
-        uint redeemTokens
-    ) public virtual;
-
     function borrowAllowed(
         address cToken,
         address borrower,
         uint borrowAmount
     ) external virtual;
-
-    function addToTheMarket(CToken ctoken, address account) internal virtual;
 
     function mintAllowed(address cToken) external view virtual;
 
@@ -56,4 +48,12 @@ abstract contract ComptrollerInterface {
     ) public virtual returns (uint256, uint256);
 
     function supportMarket(CToken cToken) external virtual;
+
+    function redeemAllowed(
+        address cToken,
+        address redeemer,
+        uint redeemTokens
+    ) public virtual;
+
+    function addToTheMarket(CToken ctoken, address account) internal virtual;
 }

@@ -244,29 +244,50 @@ abstract contract CTokenInterface is CTokenStorage {
 
     function transfer(address dst, uint amount) external virtual returns (bool);
 
+    /**
+     *
+     * @param src Tokens will transfer from this address
+     * @param dst  Tokens are transferred to this address
+     * @param amount  Number of tokens transferred
+     */
     function transferFrom(
         address src,
         address dst,
         uint amount
     ) external virtual returns (bool);
 
+    /**
+     *
+     * @param spender Address to whom approval is given
+     * @param amount  Amount spender can use
+     */
     function approve(
         address spender,
         uint amount
     ) external virtual returns (bool);
 
+/**
+ * 
+ * @param owner owner  of Token
+ * @param spender will get access to tokens
+ */
     function allowance(
         address owner,
         address spender
     ) external view virtual returns (uint);
 
+ 
+/**  @param owner get balance of owner */
     function balanceOf(address owner) external view virtual returns (uint);
 
+ 
+/** @param owner Get underlying balance of the user */
     function balanceOfUnderlying(address owner) external virtual returns (uint);
 
-    function getBorrowRate() internal virtual returns (uint256);
-
-    function getSupplyRate() internal virtual returns (uint256);
+/** It returns snapshot of given account */
+    function getAccountSnapshot(
+        address account
+    ) external view virtual returns (uint, uint, uint);
 
     function currentExchangeRate() public virtual returns (uint);
 
@@ -282,7 +303,7 @@ abstract contract CTokenInterface is CTokenStorage {
 
     function getCashPrior() internal view virtual returns (uint256);
 
-    function getAccountSnapshot(
-        address account
-    ) external view virtual returns (uint, uint, uint);
+    function getBorrowRate() internal virtual returns (uint256);
+
+    function getSupplyRate() internal virtual returns (uint256);
 }

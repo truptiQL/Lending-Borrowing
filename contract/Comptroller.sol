@@ -7,28 +7,27 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 contract Comptroller is ComptrollerInterface, Initializable {
     uint256 collateralFactor;
+    uint256[49] private __gap;
 
     function initialize() public initializer {
         admin = msg.sender;
-        collateralFactor = 8 * 1e7; //0.8
+        collateralFactor = 8 * 1e17; //0.8
     }
+
+    /**
+     *
+     * @param cToken will be enter in market
+     */
 
     function enterMarket(CToken cToken) public override {
         addToTheMarket(cToken, msg.sender);
     }
 
-    function addToTheMarket(CToken cToken, address borrower) internal override {
-        Market storage marketToJoin = markets[address(cToken)];
-
-        require(marketToJoin.isListed, "Market not listed");
-        if (marketToJoin.accountMembership[borrower] == false) {
-            marketToJoin.accountMembership[borrower] = true;
-
-            accountAssets[borrower].push(cToken);
-
-            emit AddedToTheMarket(address(cToken), borrower);
-        }
-    }
+    /**
+     * @notice Add the market to the markets mapping and set it as listed
+     * @dev Admin function to set isListed and add support for the market
+     * @param cToken The address of the market (token) to list
+     */
 
     function supportMarket(CToken cToken) external override {
         require(msg.sender == admin, "only admin can call this function");
@@ -38,6 +37,39 @@ contract Comptroller is ComptrollerInterface, Initializable {
         markets[address(cToken)].isListed = true;
 
         emit MarketAdded(address(cToken));
+    }
+
+    function borrowAllowed(
+        address cToken,
+        address borrower,
+        uint256 borrowAmount
+    ) external override {
+        require(markets[cToken].isListed, "Market not listed");
+
+        //Market of cToken should be there to enable borrow
+        if (!markets[cToken].accountMembership[borrower]) {
+            addToTheMarket(CToken(cToken), borrower);
+        }
+
+        //If shortfall is not 0 then user is not allowed to borrow
+
+        (, uint shortfall) = getAccountLiquidity(
+            borrower,
+            cToken,
+            0,
+            borrowAmount
+        );
+        require(shortfall == 0, "Insufficient liquidity");
+    }
+
+    function mintAllowed(address cToken) external view override {
+        //cToken market must be present to mint
+        require(markets[cToken].isListed, "market not listed");
+    }
+
+    function repayAllowed(address cToken) external view override {
+        //cToken market must be present to repay
+        require(markets[cToken].isListed, "market not listed");
     }
 
     function exitMarket(address cTokenAddress) public override {
@@ -59,12 +91,19 @@ contract Comptroller is ComptrollerInterface, Initializable {
             /* Set cToken account membership to false */
             delete marketToExit.accountMembership[msg.sender];
             CToken[] memory userAssetList = accountAssets[msg.sender];
-            if (userAssetList[0] == cToken) {
-                userAssetList[0] = userAssetList[1];
-                delete userAssetList[1];
-            } else if (userAssetList[1] == cToken) {
-                delete userAssetList[1];
+            uint256 len = userAssetList.length;
+            uint256 index;
+            for (uint256 i = 0; i < len; i++) {
+                if (userAssetList[i] == cToken) {
+                    index = i;
+                    break;
+                }
             }
+
+            // copy last item in list to location of item to be removed, reduce length by 1
+            CToken[] storage storedList = accountAssets[msg.sender];
+            storedList[index] = storedList[storedList.length - 1];
+            storedList.pop();
 
             emit MatketExit(address(cToken));
         }
@@ -82,11 +121,10 @@ contract Comptroller is ComptrollerInterface, Initializable {
         uint256 redeemTokens,
         uint256 borrowAmount
     ) public view override returns (uint256, uint256) {
-        uint256 _collateralFactor = 8 * 1e7;
-        // We have only 2 markets currently so summing up their liquidity
-
         CToken[] memory assets = accountAssets[account];
         AccountLiquidityLocalVars memory vars;
+
+        // calculation for all the asset use having
         for (uint256 i = 0; i < assets.length; i++) {
             CToken asset = assets[i];
             (
@@ -94,7 +132,7 @@ contract Comptroller is ComptrollerInterface, Initializable {
                 uint256 borrowBalance,
                 uint256 exchangeRate
             ) = asset.getAccountSnapshot(account);
-            vars.tokensToDenom = _collateralFactor * exchangeRate * 1;
+            vars.tokensToDenom = collateralFactor * exchangeRate * 1;
             vars.sumCollateral += cTokenBalance * vars.tokensToDenom;
             vars.sumBorrowPlusEffects += 1 * borrowBalance;
 
@@ -106,6 +144,8 @@ contract Comptroller is ComptrollerInterface, Initializable {
                 vars.sumBorrowPlusEffects += 1 * borrowAmount;
             }
         }
+
+        //Check for underflow
         if (vars.sumCollateral > vars.sumBorrowPlusEffects) {
             return (vars.sumCollateral - vars.sumBorrowPlusEffects, 0);
         } else {
@@ -113,6 +153,10 @@ contract Comptroller is ComptrollerInterface, Initializable {
         }
     }
 
+    ///
+    /// @param cToken cToken  to redeem
+    /// @param redeemer will get the redeemed tokens
+    /// @param redeemTokens Number of tokens to redeem
     function redeemAllowed(
         address cToken,
         address redeemer,
@@ -132,31 +176,17 @@ contract Comptroller is ComptrollerInterface, Initializable {
         require(shortfall == 0, "Insufficient liquidity");
     }
 
-    function borrowAllowed(
-        address cToken,
-        address borrower,
-        uint256 borrowAmount
-    ) external override {
-        require(markets[cToken].isListed, "Market not listed");
+    /// borrower must add the cToken to the market first before borrowing another token
+    function addToTheMarket(CToken cToken, address borrower) internal override {
+        Market storage marketToJoin = markets[address(cToken)];
 
-        if (!markets[cToken].accountMembership[borrower]) {
-            addToTheMarket(CToken(cToken), borrower);
+        require(marketToJoin.isListed, "Market not listed");
+        if (marketToJoin.accountMembership[borrower] == false) {
+            marketToJoin.accountMembership[borrower] = true;
+
+            accountAssets[borrower].push(cToken);
+
+            emit AddedToTheMarket(address(cToken), borrower);
         }
-
-        (, uint shortfall) = getAccountLiquidity(
-            borrower,
-            cToken,
-            0,
-            borrowAmount
-        );
-        require(shortfall == 0, "Insufficient liquidity");
-    }
-
-    function mintAllowed(address cToken) external view override {
-        require(markets[cToken].isListed, "market not listed");
-    }
-
-    function repayAllowed(address cToken) external view override {
-        require(markets[cToken].isListed, "market not listed");
     }
 }

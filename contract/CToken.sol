@@ -36,53 +36,6 @@ contract CToken is CTokenInterface, Initializable {
         _notEntered = true; // get a gas-refund post-Istanbul
     }
 
-    function transferTokens(
-        address spender,
-        address src,
-        address dst,
-        uint tokens
-    ) internal returns (bool) {
-        /* Fail if transfer not allowed */
-
-        /* Do not allow self-transfers */
-        if (src == dst) {
-            revert();
-        }
-
-        /* Get the allowance, infinite for the account owner */
-        uint startingAllowance = 0;
-        if (spender == src) {
-            startingAllowance = type(uint).max;
-        } else {
-            startingAllowance = transferAllowances[src][spender];
-        }
-
-        /* Do the calculations, checking for {under,over}flow */
-        uint allowanceNew = startingAllowance - tokens;
-        uint srcTokensNew = accountTokens[src] - tokens;
-        uint dstTokensNew = accountTokens[dst] + tokens;
-
-        /////////////////////////
-        // EFFECTS & INTERACTIONS
-        // (No safe failures beyond this point)
-
-        accountTokens[src] = srcTokensNew;
-        accountTokens[dst] = dstTokensNew;
-
-        /* Eat some of the allowance (if necessary) */
-        if (startingAllowance != type(uint).max) {
-            transferAllowances[src][spender] = allowanceNew;
-        }
-
-        /* We emit a Transfer event */
-        emit Transfer(src, dst, tokens);
-
-        // unused function
-        // comptroller.transferVerify(address(this), src, dst, tokens);
-
-        return true;
-    }
-
     /**
      * @notice Transfer `amount` tokens from `msg.sender` to `dst`
      * @param dst The address of the destination account
@@ -140,6 +93,16 @@ contract CToken is CTokenInterface, Initializable {
         address spender
     ) external view override returns (uint256) {
         return transferAllowances[owner][spender];
+    }
+
+    function getAccountSnapshot(
+        address account
+    ) external view override returns (uint, uint, uint) {
+        return (
+            accountTokens[account],
+            borrowBalance[account],
+            currentExchangeRate()
+        );
     }
 
     /**
@@ -221,6 +184,7 @@ contract CToken is CTokenInterface, Initializable {
     }
 
     /// @param mintAmount number of underlying assets
+    /// Mint equivalent number of cTokens
     function mintToken(uint256 mintAmount) public override {
         accrueInterest();
 
@@ -242,6 +206,11 @@ contract CToken is CTokenInterface, Initializable {
         emit Transfer(cToken, minter, mintTokens);
     }
 
+    /**
+     *
+     * @param redeemer will get redeemed Tokens
+     * @param _redeemTokens  Number of tokens redeemed
+     */
     function redeemTokens(
         address redeemer,
         uint256 _redeemTokens
@@ -272,6 +241,11 @@ contract CToken is CTokenInterface, Initializable {
     }
 
     // It will work for borrow and borrowOnbehalf also
+    /**
+     *
+     * @param borrower Will pay borrow
+     * @param borrowAmount Amount repay by the borrower
+     */
     function borrow(address borrower, uint256 borrowAmount) public override {
         accrueInterest();
         require(
@@ -279,7 +253,7 @@ contract CToken is CTokenInterface, Initializable {
             "This much amount is not available"
         );
 
-        ComptrollerInterface(comptroller).borrowAllowed(
+       comptroller.borrowAllowed(
             address(this),
             borrower,
             borrowBalance[borrower] + borrowAmount
@@ -298,11 +272,18 @@ contract CToken is CTokenInterface, Initializable {
         );
     }
 
+    /**
+     *
+     * @param borrower whose borrow will be repaid
+     * @param repayAmount Amount repay by function caller
+     */
     function repayBorrow(
         address borrower,
         uint256 repayAmount
     ) public override {
         accrueInterest();
+
+        comptroller.repayAllowed(address(this));
 
         require(
             borrowBalance[borrower] >= repayAmount,
@@ -313,8 +294,13 @@ contract CToken is CTokenInterface, Initializable {
         borrowBalance[borrower] -= repayAmount;
         totalBorrows -= repayAmount;
 
-         emit RepayBorrow(msg.sender, borrower, repayAmount, borrowBalance[borrower], totalBorrows);
-
+        emit RepayBorrow(
+            msg.sender,
+            borrower,
+            repayAmount,
+            borrowBalance[borrower],
+            totalBorrows
+        );
     }
 
     function currentExchangeRate() public view override returns (uint) {
@@ -340,10 +326,16 @@ contract CToken is CTokenInterface, Initializable {
         }
     }
 
+    /**
+     * get underlying balance of cToken
+     */
     function getCashPrior() internal view override returns (uint256) {
         return IERC20(underlying).balanceOf(address(this));
     }
 
+    /**
+     * get borrow rate based of ctoken
+     */
     function getBorrowRate() internal view override returns (uint256) {
         return
             interestRateModel.getBorrowRate(
@@ -353,6 +345,9 @@ contract CToken is CTokenInterface, Initializable {
             );
     }
 
+    /**
+     * get supply rate based of ctoken
+     */
     function getSupplyRate() internal view override returns (uint256) {
         return
             interestRateModel.getSupplyRate(
@@ -363,13 +358,50 @@ contract CToken is CTokenInterface, Initializable {
             );
     }
 
-    function getAccountSnapshot(
-        address account
-    ) external view override returns (uint, uint, uint) {
-        return (
-            accountTokens[account],
-            borrowBalance[account],
-            currentExchangeRate()
-        );
+    function transferTokens(
+        address spender,
+        address src,
+        address dst,
+        uint tokens
+    ) internal returns (bool) {
+        /* Fail if transfer not allowed */
+
+        /* Do not allow self-transfers */
+        if (src == dst) {
+            revert();
+        }
+
+        /* Get the allowance, infinite for the account owner */
+        uint startingAllowance = 0;
+        if (spender == src) {
+            startingAllowance = type(uint).max;
+        } else {
+            startingAllowance = transferAllowances[src][spender];
+        }
+
+        /* Do the calculations, checking for {under,over}flow */
+        uint allowanceNew = startingAllowance - tokens;
+        uint srcTokensNew = accountTokens[src] - tokens;
+        uint dstTokensNew = accountTokens[dst] + tokens;
+
+        /////////////////////////
+        // EFFECTS & INTERACTIONS
+        // (No safe failures beyond this point)
+
+        accountTokens[src] = srcTokensNew;
+        accountTokens[dst] = dstTokensNew;
+
+        /* Eat some of the allowance (if necessary) */
+        if (startingAllowance != type(uint).max) {
+            transferAllowances[src][spender] = allowanceNew;
+        }
+
+        /* We emit a Transfer event */
+        emit Transfer(src, dst, tokens);
+
+        // unused function
+        // comptroller.transferVerify(address(this), src, dst, tokens);
+
+        return true;
     }
 }
