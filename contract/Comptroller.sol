@@ -176,6 +176,11 @@ contract Comptroller is ComptrollerInterface, Initializable {
         require(shortfall == 0, "Insufficient liquidity");
     }
 
+
+    function getCollateralLength(address account) public view override returns(uint256) {
+        return accountAssets[account].length;
+    }
+
     /// borrower must add the cToken to the market first before borrowing another token
     function addToTheMarket(CToken cToken, address borrower) internal override {
         Market storage marketToJoin = markets[address(cToken)];
@@ -189,4 +194,6 @@ contract Comptroller is ComptrollerInterface, Initializable {
             emit AddedToTheMarket(address(cToken), borrower);
         }
     }
+
+    
 }

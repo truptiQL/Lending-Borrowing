@@ -55,5 +55,8 @@ abstract contract ComptrollerInterface {
         uint redeemTokens
     ) public virtual;
 
+    function getCollateralLength(address account) public virtual view returns(uint256) ;
+
+
     function addToTheMarket(CToken ctoken, address account) internal virtual;
 }
