@@ -2,17 +2,40 @@
 pragma solidity 0.8.19;
 
 import "./ComptrollerInterface.sol";
-// import "./TimeLock.sol";
-
+import "hardhat/console.sol";
 
 interface TimelockInterface {
     function delay() external view returns (uint);
+
     function GRACE_PERIOD() external view returns (uint);
+
     function acceptAdmin() external;
+
     function queuedTransactions(bytes32 hash) external view returns (bool);
-    function queueTransaction(address target, uint value, string calldata signature, bytes calldata data, uint eta) external returns (bytes32);
-    function cancelTransaction(address target, uint value, string calldata signature, bytes calldata data, uint eta) external;
-    function executeTransaction(address target, uint value, string calldata signature, bytes calldata data, uint eta) external payable returns (bytes memory);
+
+    function queueTransaction(
+        address target,
+        uint value,
+        string calldata signature,
+        bytes calldata data,
+        uint eta
+    ) external returns (bytes32);
+
+    function cancelTransaction(
+        address target,
+        uint value,
+        string calldata signature,
+        bytes calldata data,
+        uint eta
+    ) external;
+
+    function executeTransaction(
+        address target,
+        uint value,
+        string calldata signature,
+        bytes calldata data,
+        uint eta
+    ) external payable returns (bytes memory);
 }
 
 contract Governor {
@@ -21,7 +44,7 @@ contract Governor {
 
     constructor(address _comptroller, address _timeLock) {
         comptroller = ComptrollerInterface(_comptroller);
-        TimeLock =  TimelockInterface(_timeLock);
+        TimeLock = TimelockInterface(_timeLock);
     }
 
     function votingDelay() public pure returns (uint) {
@@ -68,6 +91,8 @@ contract Governor {
         bool canceled;
         /// @notice Flag marking whether the proposal has been executed
         bool executed;
+        /// @notice get receipt of every user
+        mapping(address => Receipt) receipts;
     }
 
     /// @notice Possible states that a proposal may be in
@@ -82,8 +107,21 @@ contract Governor {
         Executed
     }
 
+    /// @notice Receipts of ballots for the entire set of voters
+    mapping(address => Receipt) receipts;
+
+    /// @notice Ballot receipt record for a voter
+    struct Receipt {
+        /// @notice Whether or not a vote has been cast
+        bool hasVoted;
+        /// @notice Whether or not the voter supports the proposal or abstains
+        bool support;
+        /// @notice The number of votes the voter had, which were cast
+        uint256 votes;
+    }
+
     /// @notice The official record of all proposals ever proposed
-    mapping(uint => Proposal) public proposals;
+    mapping(uint256 => Proposal) public proposals;
 
     /// @notice The latest proposal for each proposer
     mapping(address => uint) public latestProposalIds;
@@ -113,6 +151,7 @@ contract Governor {
         } else if (block.number <= proposal.startBlock) {
             return ProposalState.Pending;
         } else if (block.number <= proposal.endBlock) {
+            // console.logInt(ProposalState.Active);
             return ProposalState.Active;
         } else if (
             proposal.forVotes <= proposal.againstVotes ||
@@ -134,18 +173,24 @@ contract Governor {
 
     function propose(string memory description) public returns (uint256) {
         uint256 collateral = comptroller.getCollateralLength(msg.sender);
+        console.log("collate4ral", collateral);
         require(
-            collateral >= 5,
+            collateral >= 2,
             "Proposer does not have enough collateral to propose"
         );
 
+        uint256 startBlock = (block.number + votingDelay());
+        uint256 endBlock = (startBlock + votingPeriod());
+
         proposalCount++;
-        uint proposalId = proposalCount;
+        uint256 proposalId = proposalCount;
         Proposal storage newProposal = proposals[proposalId];
 
         newProposal.id = proposalId;
         newProposal.proposer = msg.sender;
         newProposal.eta = 0;
+        newProposal.startBlock = startBlock;
+        newProposal.endBlock = endBlock;
         newProposal.forVotes = 0;
         newProposal.againstVotes = 0;
         newProposal.canceled = false;
@@ -184,8 +229,50 @@ contract Governor {
         );
 
         Proposal storage proposal = proposals[proposalId];
-        
+
         proposal.canceled = true;
         emit ProposalCanceled(proposalId);
+    }
+
+    /**
+     * @notice Gets the receipt for a voter on a given proposal
+     * @param proposalId the id of proposal
+     * @param voter The address of the voter
+     * @return The voting receipt
+     */
+    function getReceipt(
+        uint256 proposalId,
+        address voter
+    ) external view returns (Receipt memory) {
+        return proposals[proposalId].receipts[voter];
+    }
+
+    function castVote(uint256 proposalId, bool support) external {
+        require(proposalId <= proposalCount, "Invalid proposalId");
+        require(state(proposalId) == ProposalState.Active, "Voting is closed");
+
+        Proposal storage proposal = proposals[proposalId];
+        Receipt storage receipt = proposal.receipts[msg.sender];
+        require(receipt.hasVoted == false, "Voter has already voted");
+
+        ///checking for voting rights
+        uint256 collateral = comptroller.getCollateralLength(msg.sender);
+        require(collateral >= 1, "Voter has not right to vote");
+
+        if (support) {
+            proposal.forVotes += collateral;
+        } else {
+            proposal.againstVotes += collateral;
+        }
+
+        receipt.hasVoted = true;
+        receipt.support = support;
+        receipt.votes = collateral;
+
+        emit VoteCast(msg.sender, proposalId, support, collateral);
+    }
+
+    function getCurrentVotes(uint256 proposalId) external view returns(uint256, uint256) {
+        return(proposals[proposalId].forVotes, proposals[proposalId].againstVotes);
     }
 }

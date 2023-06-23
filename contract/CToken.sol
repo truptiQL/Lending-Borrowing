@@ -6,6 +6,7 @@ import "./InterestRateModel.sol";
 import "./CTokenInterface.sol";
 import "./ERC20.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "hardhat/console.sol";
 
 contract CToken is CTokenInterface, Initializable {
     ComptrollerInterface comptroller;
