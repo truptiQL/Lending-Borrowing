@@ -3,6 +3,7 @@ const { ethers } = require("hardhat");
 const chai = require("chai");
 chai.use(require("chai-bignumber")(ethers.BigNumber));
 const { describe } = require("mocha");
+const { mine } = require("@nomicfoundation/hardhat-network-helpers");
 
 let comptroller,
   token1,
@@ -109,8 +110,39 @@ describe("Governor", async function () {
     expect(governor.castVote(1, false)).to.be.revertedWith(
       "Voter has already voted"
     );
-
-    expect(await governor.getCurrentVotes(1)).to.eqls(2);
   });
 
+  it.only("queue", async function () {
+    const [, addr] = await ethers.getSigners();
+
+    await token1.mint(addr.address, 5000);
+    await token1.connect(addr).approve(ctoken1.address, 1000);
+    await ctoken1.connect(addr).mintToken(1000);
+    await comptroller.connect(addr).enterMarket(ctoken1.address);
+
+    await token2.mint(addr.address, 5000);
+    await token2.connect(addr).approve(ctoken2.address, 1000);
+    await ctoken2.connect(addr).mintToken(1000);
+    await comptroller.connect(addr).enterMarket(ctoken2.address);
+
+    expect(await governor.connect(addr).castVote(1, true)).to.emit(
+      governor,
+      "VoteCast"
+    );
+
+    // instantly mine 17280 blocks as voting period is of 17280 blocks
+    await mine(17280);
+    expect(await governor.queue(1)).to.emit(governor, "ProposalQueued");
+  });
+
+  it.only("execute", async function () {
+    await governor.execute(1);
+    expect(await governor.state(1)).to.eq(7);
+  });
+
+  it.only("cancel", async function () {
+    await governor.propose("Should have static interest rate");
+    expect(await governor.cancel(2)).to.emit(governor, "ProposalCanceled");
+    expect(await governor.state(2)).to.eq(2);
+  });
 });

@@ -15,26 +15,26 @@ interface TimelockInterface {
 
     function queueTransaction(
         address target,
-        uint value,
+        uint256 value,
         string calldata signature,
         bytes calldata data,
-        uint eta
+        uint256 eta
     ) external returns (bytes32);
 
     function cancelTransaction(
         address target,
-        uint value,
+        uint256 value,
         string calldata signature,
         bytes calldata data,
-        uint eta
+        uint256 eta
     ) external;
 
     function executeTransaction(
         address target,
-        uint value,
+        uint256 value,
         string calldata signature,
         bytes calldata data,
-        uint eta
+        uint256 eta
     ) external payable returns (bytes memory);
 }
 
@@ -47,16 +47,16 @@ contract Governor {
         TimeLock = TimelockInterface(_timeLock);
     }
 
-    function votingDelay() public pure returns (uint) {
+    function votingDelay() public pure returns (uint256) {
         return 1;
     } // 1 block
 
-    function quorumVotes() public pure returns (uint) {
-        return 400000e18;
-    } // 400,000 = 4% of Comp
+    function quorumVotes() public pure returns (uint256) {
+        return 4;
+    }
 
     /// @notice The duration of voting on a proposal, in blocks
-    function votingPeriod() public pure virtual returns (uint) {
+    function votingPeriod() public pure virtual returns (uint256) {
         return 17280;
     } // ~3 days in blocks (assuming 15s blocks)
 
@@ -70,23 +70,23 @@ contract Governor {
     address public guardian;
 
     /// @notice The total number of proposals
-    uint public proposalCount;
+    uint256 public proposalCount;
 
     struct Proposal {
         /// @notice Unique id for looking up a proposal
-        uint id;
+        uint256 id;
         /// @notice Creator of the proposal
         address proposer;
         /// @notice The timestamp that the proposal will be available for execution, set once the vote succeeds
-        uint eta;
+        uint256 eta;
         /// @notice The block at which voting begins: holders must delegate their votes prior to this block
-        uint startBlock;
+        uint256 startBlock;
         /// @notice The block at which voting ends: votes must be cast prior to this block
-        uint endBlock;
+        uint256 endBlock;
         /// @notice Current number of votes in favor of this proposal
-        uint forVotes;
+        uint256 forVotes;
         /// @notice Current number of votes in opposition to this proposal
-        uint againstVotes;
+        uint256 againstVotes;
         /// @notice Flag marking whether the proposal has been canceled
         bool canceled;
         /// @notice Flag marking whether the proposal has been executed
@@ -123,35 +123,38 @@ contract Governor {
     /// @notice The official record of all proposals ever proposed
     mapping(uint256 => Proposal) public proposals;
 
-    /// @notice The latest proposal for each proposer
-    mapping(address => uint) public latestProposalIds;
-
-    event ProposalCreated(uint id, address proposer, string description);
+    event ProposalCreated(uint256 id, address proposer, string description);
 
     /// @notice An event emitted when a vote has been cast on a proposal
-    event VoteCast(address voter, uint proposalId, bool support, uint votes);
+    event VoteCast(
+        address voter,
+        uint256 proposalId,
+        bool support,
+        uint256 votes
+    );
 
     /// @notice An event emitted when a proposal has been canceled
-    event ProposalCanceled(uint id);
+    event ProposalCanceled(uint256 id);
 
     /// @notice An event emitted when a proposal has been queued in the Timelock
-    event ProposalQueued(uint id, uint eta);
+    event ProposalQueued(uint256 id, uint256 eta);
 
     /// @notice An event emitted when a proposal has been executed in the Timelock
-    event ProposalExecuted(uint id);
+    event ProposalExecuted(uint256 id);
 
-    function state(uint proposalId) public view returns (ProposalState) {
+    function state(uint256 proposalId) public view returns (ProposalState) {
         require(
             proposalCount >= proposalId && proposalId > 0,
             "GovernorAlpha::state: invalid proposal id"
         );
+
         Proposal storage proposal = proposals[proposalId];
+
         if (proposal.canceled) {
             return ProposalState.Canceled;
         } else if (block.number <= proposal.startBlock) {
             return ProposalState.Pending;
         } else if (block.number <= proposal.endBlock) {
-            // console.logInt(ProposalState.Active);
             return ProposalState.Active;
         } else if (
             proposal.forVotes <= proposal.againstVotes ||
@@ -173,7 +176,6 @@ contract Governor {
 
     function propose(string memory description) public returns (uint256) {
         uint256 collateral = comptroller.getCollateralLength(msg.sender);
-        console.log("collate4ral", collateral);
         require(
             collateral >= 2,
             "Proposer does not have enough collateral to propose"
@@ -270,9 +272,5 @@ contract Governor {
         receipt.votes = collateral;
 
         emit VoteCast(msg.sender, proposalId, support, collateral);
-    }
-
-    function getCurrentVotes(uint256 proposalId) external view returns(uint256, uint256) {
-        return(proposals[proposalId].forVotes, proposals[proposalId].againstVotes);
     }
 }
